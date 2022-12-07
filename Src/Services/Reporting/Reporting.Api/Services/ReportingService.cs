@@ -35,14 +35,14 @@ public class ReportingService : IReportingService
         if (contactInformation == null)
         {
             reportCompletedEvent.Status = ReportStatus.Failed;
-            await _reportingIntegrationEventService.PublishThroughEventBusAsync(reportCompletedEvent);
+            _reportingIntegrationEventService.PublishThroughEventBus(reportCompletedEvent);
         }
 
         var reportFilePath = await GenerateReportFileAsync(reportId, contactInformation);
 
         reportCompletedEvent.PathToReportFile = reportFilePath;
 
-        await _reportingIntegrationEventService.PublishThroughEventBusAsync(reportCompletedEvent);
+        _reportingIntegrationEventService.PublishThroughEventBus(reportCompletedEvent);
     }
 
     public async Task<ICollection<ContactInformationDao>?> RequestContactInformationAsync()

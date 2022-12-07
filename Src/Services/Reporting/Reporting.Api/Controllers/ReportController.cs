@@ -63,7 +63,7 @@ namespace Reporting.Api.Controllers
                 ReportId = newReportId
             };
 
-            await _reportingIntegrationEventService.PublishThroughEventBusAsync(reportRequestedEvent);
+            _reportingIntegrationEventService.PublishThroughEventBus(reportRequestedEvent);
 
             return Ok(newReportId);
         }

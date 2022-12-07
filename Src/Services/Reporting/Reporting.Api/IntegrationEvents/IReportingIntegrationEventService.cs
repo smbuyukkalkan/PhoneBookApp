@@ -5,6 +5,6 @@ namespace Reporting.Api.IntegrationEvents
     public interface IReportingIntegrationEventService
     {
 
-        Task PublishThroughEventBusAsync(IntegrationEvent evt);
+        void PublishThroughEventBus(IntegrationEvent evt);
     }
 }

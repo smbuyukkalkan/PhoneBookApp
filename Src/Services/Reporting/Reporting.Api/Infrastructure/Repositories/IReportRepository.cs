@@ -4,7 +4,7 @@ namespace Reporting.Api.Infrastructure.Repositories;
 
 public interface IReportRepository
 {
-    Task<ICollection<Report>> GetAllReportsAsync();
+    Task<IEnumerable<Report>> GetAllReportsAsync();
 
     Task<Report?> GetReportByIdAsync(Guid id);
 

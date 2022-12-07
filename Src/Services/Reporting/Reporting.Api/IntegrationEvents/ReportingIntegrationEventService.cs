@@ -16,7 +16,7 @@ namespace Reporting.Api.IntegrationEvents
             _reportingContext = reportingContext ?? throw new ArgumentNullException(nameof(reportingContext));
         }
 
-        public async Task PublishThroughEventBusAsync(IntegrationEvent evt)
+        public void PublishThroughEventBus(IntegrationEvent evt)
         {
             _eventBus.Publish(evt);
         }

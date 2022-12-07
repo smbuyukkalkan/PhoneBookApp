@@ -12,7 +12,7 @@ namespace Reporting.Api.Infrastructure.Repositories
         }
 
 
-        public async Task<ICollection<Report>> GetAllReportsAsync()
+        public async Task<IEnumerable<Report>> GetAllReportsAsync()
         {
             return await _reportingContext.Reports.ToListAsync();
         }
