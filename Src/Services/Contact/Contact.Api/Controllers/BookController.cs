@@ -57,7 +57,7 @@ namespace Contact.Api.Controllers
 
         [HttpPost]
         [Route("CreateContact")]
-        [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateContactAsync(Models.Contact contact)
         {
