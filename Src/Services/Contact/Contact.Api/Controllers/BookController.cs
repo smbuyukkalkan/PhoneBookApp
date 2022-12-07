@@ -58,12 +58,22 @@ namespace Contact.Api.Controllers
         [HttpPost]
         [Route("CreateContact")]
         [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateContactAsync(Models.Contact contact)
         {
+            var nameTrimmed = contact.Name.Trim();
+            var surnameTrimmed = contact.Surname.Trim();
+
+            if (string.IsNullOrWhiteSpace(nameTrimmed))
+                return BadRequest("The given name is empty.");
+
+            if (string.IsNullOrWhiteSpace(surnameTrimmed))
+                return BadRequest("The given surname is empty.");
+
             var newContact = new Models.Contact
             {
-                Name = contact.Name.Trim(),
-                Surname = contact.Surname.Trim(),
+                Name = nameTrimmed,
+                Surname = surnameTrimmed,
                 Company = contact.Company.Trim()
             };
 
