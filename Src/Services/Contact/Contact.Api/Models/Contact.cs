@@ -18,6 +18,6 @@
         /// <summary>
         /// The company the contact is working in.
         /// </summary>
-        public string Company { get; set; }
+        public string? Company { get; set; }
     }
 }
