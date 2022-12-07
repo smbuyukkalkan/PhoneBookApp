@@ -29,7 +29,7 @@ namespace Contact.Api.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Company")
-                        .IsRequired()
+                        .IsRequired(false)
                         .HasColumnType("text");
 
                     b.Property<string>("Name")

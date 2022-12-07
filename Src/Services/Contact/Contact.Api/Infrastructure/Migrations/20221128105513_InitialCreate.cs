@@ -16,7 +16,7 @@ namespace Contact.Api.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
                     Surname = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
-                    Company = table.Column<string>(type: "text", nullable: false)
+                    Company = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
