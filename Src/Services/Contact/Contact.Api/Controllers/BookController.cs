@@ -223,7 +223,7 @@ namespace Contact.Api.Controllers
         [HttpGet]
         [Route("GetAllContactInformation")]
         [ProducesResponseType(typeof(ContactInformationDao), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult> GetAllContactInformationAsync()
+        public async Task<IActionResult> GetAllContactInformationAsync()
         {
             var contactInformation = await _bookContext.ContactInformation.ToListAsync();
             var result = contactInformation.Select(ci => new ContactInformationDao
