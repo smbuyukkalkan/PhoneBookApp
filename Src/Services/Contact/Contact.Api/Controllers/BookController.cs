@@ -1,9 +1,8 @@
 ﻿using Contact.Api.Daos;
 using Contact.Api.Enums;
-using Contact.Api.Infrastructure;
+using Contact.Api.Infrastructure.Repositories;
 using Contact.Api.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace Contact.Api.Controllers
@@ -12,11 +11,14 @@ namespace Contact.Api.Controllers
     [ApiController]
     public class BookController : ControllerBase
     {
-        private readonly BookContext _bookContext;
+        private readonly IContactRepository _contactRepository;
+        private readonly IContactInformationRepository _contactInformationRepository;
 
-        public BookController(BookContext dbContext)
+        public BookController(IContactRepository contactRepository, IContactInformationRepository contactInformationRepository)
         {
-            _bookContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+
+            _contactRepository = contactRepository ?? throw new ArgumentNullException(nameof(contactRepository));
+            _contactInformationRepository = contactInformationRepository ?? throw new ArgumentNullException(nameof(contactInformationRepository));
         }
 
         [HttpGet]
@@ -33,11 +35,11 @@ namespace Contact.Api.Controllers
             if (!parseResult)
                 return BadRequest("The given GUID is not in a valid format.");
 
-            var contact = await _bookContext.Contacts.FirstOrDefaultAsync(contact => contact.Id == guid);
+            var contact = await _contactRepository.GetByIdAsync(guid);
             if (contact == default(Models.Contact))
                 return NotFound();
 
-            var contactInformation = await _bookContext.ContactInformation.Where(ci => ci.ContactId == contact.Id).ToArrayAsync();
+            var contactInformation = await _contactInformationRepository.GetAllOfContactByContactGuidAsync(contact.Id);
 
             var result = new ContactWithContactInformationDao
             {
@@ -77,10 +79,9 @@ namespace Contact.Api.Controllers
                 Company = contact.Company.Trim()
             };
 
-            await _bookContext.AddAsync(newContact);
-            await _bookContext.SaveChangesAsync();
+            var id = await _contactRepository.AddAsync(newContact);
 
-            return Ok(newContact.Id);
+            return Ok(id);
         }
 
         [HttpDelete]
@@ -97,12 +98,11 @@ namespace Contact.Api.Controllers
             if (!parseResult)
                 return BadRequest("The given GUID is not in a valid format.");
 
-            var contact = await _bookContext.Contacts.FirstOrDefaultAsync(contact => contact.Id == guid);
+            var contact = await _contactRepository.GetByIdAsync(guid);
             if (contact == default(Models.Contact))
                 return NotFound();
 
-            _bookContext.Contacts.Remove(contact);
-            await _bookContext.SaveChangesAsync();
+            await _contactRepository.DeleteAsync(contact);
 
             return Ok();
         }
@@ -122,7 +122,7 @@ namespace Contact.Api.Controllers
             if (!Enum.IsDefined(typeof(ContactInformationType), contactInformationDao.Type))
                 return BadRequest("The given contact information type is invalid.");
 
-            var contact = await _bookContext.Contacts.FirstOrDefaultAsync(contact => contact.Id == contactInformationDao.ContactId);
+            var contact = await _contactRepository.GetByIdAsync(contactInformationDao.ContactId);
             if (contact == default(Models.Contact))
                 return NotFound();
 
@@ -133,19 +133,16 @@ namespace Contact.Api.Controllers
                 Content = contentTrimmed
             };
 
-            var existingContactInformation = await _bookContext.ContactInformation
-                .Where(ci => ci.ContactId == newContactInformation.ContactId)
-                .ToListAsync();
+            var existingContactInformation = await _contactInformationRepository.GetAllOfContactByContactGuidAsync(newContactInformation.ContactId);
 
             if (existingContactInformation.Any(ci => ci.Type == newContactInformation.Type && ci.Content == newContactInformation.Content))
             {
                 return BadRequest("This contact information already exists.");
             }
 
-            await _bookContext.AddAsync(newContactInformation);
-            await _bookContext.SaveChangesAsync();
+            var id = await _contactInformationRepository.AddAsync(newContactInformation);
 
-            return Ok(newContactInformation.Id);
+            return Ok(id);
         }
 
         [HttpDelete]
@@ -162,12 +159,11 @@ namespace Contact.Api.Controllers
             if (!parseResult)
                 return BadRequest("The given GUID is not in a valid format.");
 
-            var contactInformation = await _bookContext.ContactInformation.FirstOrDefaultAsync(contact => contact.Id == guid);
+            var contactInformation = await _contactInformationRepository.GetByIdAsync(guid);
             if (contactInformation == default(ContactInformation))
                 return NotFound();
 
-            _bookContext.ContactInformation.Remove(contactInformation);
-            await _bookContext.SaveChangesAsync();
+            await _contactInformationRepository.DeleteAsync(contactInformation);
 
             return Ok();
         }
@@ -177,45 +173,26 @@ namespace Contact.Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<ContactWithContactInformationDao>), (int)HttpStatusCode.OK)]
         public async Task<ActionResult<IEnumerable<ContactWithContactInformationDao>>> GetPhoneBookAsync()
         {
-            var contacts = await _bookContext.Contacts.ToArrayAsync();
-            var contactInformation = await _bookContext.ContactInformation.ToListAsync();
+            var contacts = await _contactRepository.GetAllAsync();
+            var contactInformation = await _contactInformationRepository.GetAllAsync();
 
-            var result = new List<ContactWithContactInformationDao>();
-            foreach (var contact in contacts)
-            {
-                result.Add(new ContactWithContactInformationDao
+            // Performance improvements to this, anyone?
+            var result = contacts
+                .Select(contact => new ContactWithContactInformationDao
                 {
                     Id = contact.Id,
                     Name = contact.Name,
                     Surname = contact.Surname,
                     Company = contact.Company,
-                    ContactInformation = contactInformation.Where(ci => ci.ContactId == contact.Id)
+                    ContactInformation = contactInformation
+                        .Where(ci => ci.ContactId == contact.Id)
                         .Select(ci => new ContactInformationWithoutContactIdDao
                         {
                             Type = ci.Type,
                             Content = ci.Content
                         })
-                });
-
-                contactInformation.RemoveAll(ci => ci.Id == contact.Id);
-            }
-
-            /*
-            This code uses LINQ mapping to create the list, although it doesn't remove already enumerated elements.
-            var result = contacts.Select(contact => new ContactWithContactInformationDao
-            {
-                Id = contact.Id,
-                Name = contact.Name,
-                Surname = contact.Surname,
-                Company = contact.Company,
-                ContactInformation = contactInformation.Where(ci => ci.ContactId == contact.Id)
-                    .Select(ci => new ContactInformationWithoutContactIdDao
-                    {
-                        Type = ci.Type,
-                        Content = ci.Content
-                    })
-            });
-            */
+                })
+                .ToList();
 
             return Ok(result);
         }
@@ -225,7 +202,7 @@ namespace Contact.Api.Controllers
         [ProducesResponseType(typeof(ContactInformationDao), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAllContactInformationAsync()
         {
-            var contactInformation = await _bookContext.ContactInformation.ToListAsync();
+            var contactInformation = await _contactInformationRepository.GetAllAsync();
             var result = contactInformation.Select(ci => new ContactInformationDao
             {
                 ContactId = ci.ContactId,

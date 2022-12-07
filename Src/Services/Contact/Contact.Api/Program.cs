@@ -1,6 +1,7 @@
 using Contact.Api.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
+using Contact.Api.Infrastructure.Repositories;
 
 namespace Contact.Api
 {
@@ -16,6 +17,9 @@ namespace Contact.Api
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            #region Database Related Services
+
             builder.Services.AddEntityFrameworkNpgsql().AddDbContext<BookContext>(options =>
             {
                 options.UseNpgsql(configuration["ConnectionString"], pgSqlOptions =>
@@ -24,6 +28,11 @@ namespace Contact.Api
                     pgSqlOptions.EnableRetryOnFailure(15, TimeSpan.FromSeconds(30), null);
                 });
             });
+
+            builder.Services.AddTransient<IContactRepository, DbContactRepository>();
+            builder.Services.AddTransient<IContactInformationRepository, DbContactInformationRepository>();
+
+            #endregion
 
             var app = builder.Build();
             
