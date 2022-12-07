@@ -119,12 +119,12 @@ namespace Contact.Api.Controllers
             if (string.IsNullOrWhiteSpace(contentTrimmed))
                 return BadRequest("The given contact information content is empty.");
 
+            if (!Enum.IsDefined(typeof(ContactInformationType), contactInformationDao.Type))
+                return BadRequest("The given contact information type is invalid.");
+
             var contact = await _bookContext.Contacts.FirstOrDefaultAsync(contact => contact.Id == contactInformationDao.ContactId);
             if (contact == default(Models.Contact))
                 return NotFound();
-
-            if (!Enum.IsDefined(typeof(ContactInformationType), contactInformationDao.Type))
-                return BadRequest("The given contact information type is invalid.");
 
             var newContactInformation = new ContactInformation
             {
