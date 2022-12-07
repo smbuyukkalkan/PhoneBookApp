@@ -112,7 +112,7 @@ namespace Contact.Api.Controllers
         [ProducesResponseType(typeof(Guid), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<Guid>> AddContactInformationToContactAsync(ContactInformationDao contactInformationDao)
+        public async Task<IActionResult> AddContactInformationToContactAsync(ContactInformationDao contactInformationDao)
         {
             var contentTrimmed = contactInformationDao.Content.Trim();
 
