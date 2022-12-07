@@ -114,7 +114,9 @@ namespace Contact.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<ActionResult<Guid>> AddContactInformationToContactAsync(ContactInformationDao contactInformationDao)
         {
-            if (string.IsNullOrWhiteSpace(contactInformationDao.Content))
+            var contentNormalized = contactInformationDao.Content.Trim();
+
+            if (string.IsNullOrWhiteSpace(contentNormalized))
                 return BadRequest("The given contact information content is empty.");
 
             var contact = await _bookContext.Contacts.FirstOrDefaultAsync(contact => contact.Id == contactInformationDao.ContactId);
@@ -128,7 +130,7 @@ namespace Contact.Api.Controllers
             {
                 ContactId = contact.Id,
                 Type = contactInformationDao.Type,
-                Content = contactInformationDao.Content.Trim()
+                Content = contentNormalized
             };
 
             var existingContactInformation = await _bookContext.ContactInformation
