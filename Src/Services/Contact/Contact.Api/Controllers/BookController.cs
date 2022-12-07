@@ -16,7 +16,6 @@ namespace Contact.Api.Controllers
 
         public BookController(IContactRepository contactRepository, IContactInformationRepository contactInformationRepository)
         {
-
             _contactRepository = contactRepository ?? throw new ArgumentNullException(nameof(contactRepository));
             _contactInformationRepository = contactInformationRepository ?? throw new ArgumentNullException(nameof(contactInformationRepository));
         }
@@ -26,7 +25,7 @@ namespace Contact.Api.Controllers
         [ProducesResponseType(typeof(ContactWithContactInformationDao), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<ActionResult<ContactWithContactInformationDao>> GetContactByIdAsync([FromQuery] string id)
+        public async Task<IActionResult> GetContactByIdAsync([FromQuery] string id)
         {
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("The given GUID is empty.");
