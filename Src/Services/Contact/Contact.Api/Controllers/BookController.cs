@@ -174,8 +174,8 @@ namespace Contact.Api.Controllers
 
         [HttpGet]
         [Route("GetPhoneBook")]
-        [ProducesResponseType(typeof(ICollection<ContactWithContactInformationDao>), (int)HttpStatusCode.OK)]
-        public async Task<ActionResult<ICollection<ContactWithContactInformationDao>>> GetPhoneBookAsync()
+        [ProducesResponseType(typeof(IEnumerable<ContactWithContactInformationDao>), (int)HttpStatusCode.OK)]
+        public async Task<ActionResult<IEnumerable<ContactWithContactInformationDao>>> GetPhoneBookAsync()
         {
             var contacts = await _bookContext.Contacts.ToArrayAsync();
             var contactInformation = await _bookContext.ContactInformation.ToListAsync();
