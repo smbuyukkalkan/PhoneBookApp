@@ -190,9 +190,8 @@ namespace Contact.Api.Controllers
                             Type = ci.Type,
                             Content = ci.Content
                         })
-                })
-                .ToList();
-
+                });
+            
             return Ok(result);
         }
 
@@ -202,6 +201,7 @@ namespace Contact.Api.Controllers
         public async Task<IActionResult> GetAllContactInformationAsync()
         {
             var contactInformation = await _contactInformationRepository.GetAllAsync();
+
             var result = contactInformation.Select(ci => new ContactInformationDao
             {
                 ContactId = ci.ContactId,
