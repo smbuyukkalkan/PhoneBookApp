@@ -38,7 +38,7 @@ namespace Contact.Api.Controllers
             if (contact == default(Models.Contact))
                 return NotFound();
 
-            var contactInformation = await _contactInformationRepository.GetAllOfContactByContactGuidAsync(contact.Id);
+            var contactInformation = await _contactInformationRepository.GetAllByContactGuidAsync(contact.Id);
 
             var result = new ContactWithContactInformationDao
             {
@@ -62,8 +62,8 @@ namespace Contact.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateContactAsync(Models.Contact contact)
         {
-            var nameTrimmed = contact.Name.Trim();
-            var surnameTrimmed = contact.Surname.Trim();
+            var nameTrimmed = contact.Name?.Trim();
+            var surnameTrimmed = contact.Surname?.Trim();
 
             if (string.IsNullOrWhiteSpace(nameTrimmed))
                 return BadRequest("The given name is empty.");
@@ -75,7 +75,7 @@ namespace Contact.Api.Controllers
             {
                 Name = nameTrimmed,
                 Surname = surnameTrimmed,
-                Company = contact.Company.Trim()
+                Company = contact.Company?.Trim()
             };
 
             var id = await _contactRepository.AddAsync(newContact);
@@ -113,7 +113,7 @@ namespace Contact.Api.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> AddContactInformationToContactAsync(ContactInformationDao contactInformationDao)
         {
-            var contentTrimmed = contactInformationDao.Content.Trim();
+            var contentTrimmed = contactInformationDao.Content?.Trim();
 
             if (string.IsNullOrWhiteSpace(contentTrimmed))
                 return BadRequest("The given contact information content is empty.");
@@ -132,7 +132,7 @@ namespace Contact.Api.Controllers
                 Content = contentTrimmed
             };
 
-            var existingContactInformation = await _contactInformationRepository.GetAllOfContactByContactGuidAsync(newContactInformation.ContactId);
+            var existingContactInformation = await _contactInformationRepository.GetAllByContactGuidAsync(newContactInformation.ContactId);
 
             if (existingContactInformation.Any(ci => ci.Type == newContactInformation.Type && ci.Content == newContactInformation.Content))
             {
@@ -198,7 +198,7 @@ namespace Contact.Api.Controllers
 
         [HttpGet]
         [Route("GetAllContactInformation")]
-        [ProducesResponseType(typeof(ContactInformationDao), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<ContactInformationDao>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAllContactInformationAsync()
         {
             var contactInformation = await _contactInformationRepository.GetAllAsync();

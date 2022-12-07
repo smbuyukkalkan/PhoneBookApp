@@ -8,7 +8,7 @@ namespace Contact.Api.Infrastructure.Repositories
 
         public Task<ContactInformation?> GetByIdAsync(Guid id);
 
-        public Task<IEnumerable<ContactInformation>> GetAllOfContactByContactGuidAsync(Guid contactId);
+        public Task<IEnumerable<ContactInformation>> GetAllByContactGuidAsync(Guid contactId);
 
         public Task<Guid> AddAsync(ContactInformation contactInformation);
 

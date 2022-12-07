@@ -22,7 +22,7 @@ namespace Contact.Api.Infrastructure.Repositories
             return await _bookContext.ContactInformation.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<IEnumerable<ContactInformation>> GetAllOfContactByContactGuidAsync(Guid contactId)
+        public async Task<IEnumerable<ContactInformation>> GetAllByContactGuidAsync(Guid contactId)
         {
             return await _bookContext.ContactInformation.Where(x => x.ContactId == contactId).ToListAsync();
         }

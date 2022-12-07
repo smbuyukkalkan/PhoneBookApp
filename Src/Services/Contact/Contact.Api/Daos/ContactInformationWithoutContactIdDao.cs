@@ -16,6 +16,6 @@ namespace Contact.Api.Daos
         /// <summary>
         /// The content of the contact information.
         /// </summary>
-        public string Content { get; set; }
+        public string? Content { get; set; }
     }
 }
